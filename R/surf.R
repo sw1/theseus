@@ -1,12 +1,13 @@
 #' @import ggplot2
 NULL
 
-#' Plots quality assessment
+#' Environmental variable fitting to unconstrained ordination diagrams
 #'
-#' Description paragraph
+#' Fits environmental variables as vectors (via \code{\link[vegan]{envfit}}) and smooth surfaces (via \code{\link[vegan]{ordisurf}}) to an ordination diagram. 
 #'
-#' @param PS (required) asdf
-#' @param covariates (required) asdf
+#' @param PS (required) A phyloseq object.
+#' @param covariates (required) A character vector of covariates present in the phyloseq objects sample_data(). 
+#' @param ordmet Ordination method. Options are Principal Component Analysis (PCA) or Correspondence Analysis (CA). Defaults to PCA.
 #'
 #' @return A ggplot object.
 #'
@@ -25,19 +26,23 @@ NULL
 #'
 #' @export
 
-surf <- function(PS,covariates){
+surf <- function(PS, covariates, ordmet="PCA"){
 
   plot.new()
 
   OTU <- PS@otu_table@.Data
-  SAMP <- suppressWarnings(as_tibble(PS@sam_data))
+  SAMP <- suppressWarnings(tibble::as_tibble(PS@sam_data))
 
   if (!all(covariates %in% colnames(SAMP)))
     stop('Some covaraites not found in sample data!')
 
   if (PS@otu_table@taxa_are_rows) OTU <- t(OTU)
-
-  R <- vegan::rda(OTU)
+  
+  if (ordmet=="PCA") {
+    R <- vegan::rda(OTU)
+  } else if (ordmet=="CA") {
+    R <- vegan::cca(OTU)
+  }
 
   form <- as.formula(sprintf('%s ~ %s','R',paste(covariates,collapse=' + ')))
   env <- vegan::envfit(form,SAMP,na.rm=TRUE)
@@ -51,10 +56,10 @@ surf <- function(PS,covariates){
 
     df1 <- with(O,data.frame(x=grid$x,y=rep(grid$y,each=ncol(grid$z)),z=matrix(grid$z))) %>%
       filter(!is.na(z)) %>%
-      mutate(covariate=k)
+      dplyr::mutate(covariate=k)
 
     df2 <- with(O,data.frame(x=model$x1,y=model$x2,z=NA)) %>%
-      mutate(covariate=k)
+      dplyr::mutate(covariate=k)
 
     list(df1=df1,df2=df2)
 
