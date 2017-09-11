@@ -3,24 +3,26 @@ NULL
 
 #' Plots quality assessment
 #'
-#' Description paragraph
+#' This function generates a 2-D contour map representing the location of quality scores for a designated percentile. It is intended to assist with deciding where trimming should be performed. 
 #'
-#' @param f_path (required) asdf
-#' @param r_path (required) asdf
-#' @param idx asdf
-#' @param percentile asdf. Defaults to .25.
+#' @param f_path (required) A character vector locating the forward read (Read 1) .fastq files
+#' @param r_path (required) A character vector locating the reverse read (Read 2) .fastq files
+#' @param idx Indexes (within f_path and r_path) identifying specific .fastq files for analysis
+#' @param percentile The percentile to be targeted . Defaults to .25 (i.e. the first quartile).
 #' @param n_trim asdf. Defaults to 100.
-#' @param n_seqs asdf. Defaults to 12.
-#' @param q asdf. Defaults to 25, 30, and 35.
-#' @param bins adsf. Defaults to 50.
-#' @param nc asdf. Defaults to 1.
-#' @param seed asdf.
-#' @param verbose asdf. Defaults to FALSE.
+#' @param n_seqs Integer indicating the number of samples to include in the visualization. Defaults to 12.
+#' @param q A numeric vector designating Phred quality scores to be represented on the plot. Defaults to 25, 30, and 35.
+#' @param bins Integer designating the number of bins each read should be seperated into. For example, visualizing a 250 bp read with 50 bins would imply that each bin represents 5 cycles/bp. Increasing the number of bins improves granularity at the cost of memory and processing speed. Defaults to 50.
+#' @param nc The number of cores to use when multithreading. Defaults to 1.
+#' @param seed An integer value to be used when randomly selecting the subset of samples to be visualized.
+#' @param verbose If set to TRUE, provides verbose output. Defaults to FALSE.
+#'
+#' @details 
 #'
 #' @return A ggplot object with the following attributes:
 #' \describe{
-#' \item{idx}{asdf}
-#' \item{seed}{asdf}
+#' \item{idx}{Samples used to generate the plot.}
+#' \item{seed}{Seed used to select the samples used to generate the plot.}
 #' }
 #'
 #' @references
@@ -28,14 +30,14 @@ NULL
 #' Y
 #' Z
 #'
-#' @seealso \code{\link[ShortRead]{qa}}
+#' @seealso \code{\link[ShortRead]{qa}} \code{\link[dada2]{plotQualityProfile}}
 #'
 #' @examples
 #' \dontrun{
 #' fns <- sort(list.files(data_path,full.names=TRUE))
 #' f_path <- fns[grepl('R1', fns)]
 #' r_path <- fns[grepl('R2', fns)]
-#' p1 <- qual(f_path,r_path,n_seqs=12,verbose=TRUE,percentile=.25,nc=12)
+#' p1 <- qual(f_path,r_path,n_seqs=12,verbose=TRUE,percentile=.25,nc=1)
 #' p1 + geom_hline(yintercept=175) + geom_vline(xintercept=275)
 #' }
 #'
